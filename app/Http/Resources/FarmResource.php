@@ -16,6 +16,8 @@ class FarmResource extends JsonResource
             'location' => $this->location,
             'postal_code' => $this->postal_code,
             'capacity' => $this->capacity,
+            'animal_types' => $this->animal_types ? json_decode($this->animal_types) : [],
+            'animal_breeds' => $this->animal_breeds ? json_decode($this->animal_breeds) : [],
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

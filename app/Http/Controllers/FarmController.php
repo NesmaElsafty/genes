@@ -21,7 +21,6 @@ class FarmController extends Controller
     public function index(Request $request)
     {
         try {
-            // $perPage = $request->get('per_page', 10);
             $farms = $this->farmService->getAllFarms(10);
             return response()->json([
                 'status' => true,
@@ -30,10 +29,13 @@ class FarmController extends Controller
                 'pagination' => PaginationHelper::paginate($farms),
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => $e->getMessage(),
-            ], 500);
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $e->getMessage(),
+                ],
+                500,
+            );
         }
     }
 
@@ -73,29 +75,17 @@ class FarmController extends Controller
             'location' => 'required|string|max:255',
             'postal_code' => 'required|string|max:20',
             'capacity' => 'required|integer|min:1',
+            'animal_type_name' => 'nullable|string|max:255',
+            'animal_breed_name' => 'nullable|string|max:255',
         ]);
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
         }
         try {
             $farm = $this->farmService->createFarm($request->all());
-            return response()->json(
-                [
-                    'status' => true,
-                    'message' => 'Farm created successfully',
-                    'data' => new FarmResource($farm),
-                ],
-                201,
-            );
+            return response()->json(['status' => true, 'message' => 'Farm created successfully', 'data' => $farm], 201);
         } catch (\Exception $e) {
-            return response()->json(
-                [
-                    'status' => false,
-                    'message' => 'Error creating farm',
-                    'error' => $e->getMessage(),
-                ],
-                500,
-            );
+            return response()->json(['status' => false, 'message' => 'Error creating farm', 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -108,37 +98,39 @@ class FarmController extends Controller
             'location' => 'sometimes|required|string|max:255',
             'postal_code' => 'sometimes|required|string|max:20',
             'capacity' => 'sometimes|required|integer|min:1',
+            'animal_type_name' => 'nullable|string|max:255',
+            'animal_breed_name' => 'nullable|string|max:255',
         ]);
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
+        }
+        $farm = Farm::find($id);
+        if (!$farm) {
+            return response()->json(['status' => false, 'message' => 'Farm not found'], 404);
+        }
+        if ($farm->user_id != auth()->user()->id) {
+            return response()->json(['status' => false, 'message' => 'You are not authorized to update this farm'], 403);
         }
         try {
             $farm = $this->farmService->updateFarm($id, $request->all());
             if (!$farm) {
                 return response()->json(['status' => false, 'message' => 'Farm not found'], 404);
             }
-            return response()->json(
-                [
-                    'status' => true,
-                    'message' => 'Farm updated successfully',
-                    'data' => new FarmResource($farm),
-                ],
-                200,
-            );
+            return response()->json(['status' => true, 'message' => 'Farm updated successfully', 'data' => $farm]);
         } catch (\Exception $e) {
-            return response()->json(
-                [
-                    'status' => false,
-                    'message' => 'Error updating farm',
-                    'error' => $e->getMessage(),
-                ],
-                500,
-            );
+            return response()->json(['status' => false, 'message' => 'Error updating farm', 'error' => $e->getMessage()], 500);
         }
     }
 
     public function destroy($id)
     {
+        $farm = Farm::find($id);
+        if (!$farm) {
+            return response()->json(['status' => false, 'message' => 'Farm not found'], 404);
+        }
+        if ($farm->user_id != auth()->user()->id) {
+            return response()->json(['status' => false, 'message' => 'You are not authorized to delete this farm'], 403);
+        }
         try {
             $deleted = $this->farmService->deleteFarm($id);
             if (!$deleted) {

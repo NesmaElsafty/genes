@@ -11,7 +11,16 @@ class Farm extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'name',
+        'user_id',
+        'city',
+        'location',
+        'postal_code',
+        'capacity',
+        'animal_type_name',
+        'animal_breed_name',
+    ];
 
     public function user()
     {

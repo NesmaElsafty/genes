@@ -21,14 +21,28 @@ class DatabaseSeeder extends Seeder
         ]);
         // make the admin user
         $admin = User::create([
-            'name' => 'Nesma El Safty',
-            'email' => 'nesmaelsafty18@gmail.com',
-            'phone' => '966536388494',
+            'name' => 'Admin',
+            'email' => 'info@saudinlfp.com',
+            'phone' => '966536388495',
             'is_active' => true,
             'password' => Hash::make('123456'),
         ]);
         $admin->syncRoles(['admin']);
+
+        // make the admin user
+        $client = User::create([
+            'name' => 'Client',
+            'email' => 'client@gmail.com',
+            'phone' => '966536388494',
+            'is_active' => true,
+            'password' => Hash::make('123456'),
+        ]);
+        $client->syncRoles(['client']);
         
+        $this->call([
+            AnimalTypeSeeder::class,
+            AnimalBreedSeeder::class,
+        ]);
         // Create 10 users and assign roles
         $users = \App\Models\User::factory(10)->create();
         $roles = [
@@ -43,5 +57,6 @@ class DatabaseSeeder extends Seeder
                 $user->farms()->saveMany(\App\Models\Farm::factory(2)->make());
             }
         }
+
     }
 }

@@ -18,7 +18,17 @@ class FarmService
 
     public function createFarm($data)
     {
-        return Farm::create($data);
+        $farm = new Farm();
+        $farm->name = $data['name'];
+        $farm->city = $data['city'];
+        $farm->location = $data['location'];
+        $farm->postal_code = $data['postal_code'];
+        $farm->capacity = $data['capacity'];
+        $farm->user_id = auth()->user()->id;
+        $farm->animal_types = json_encode($data['animal_types']);
+        $farm->animal_breeds = json_encode($data['animal_breeds']);
+        $farm->save();
+        return $farm;
     }
 
     public function updateFarm($id, $data)
@@ -27,7 +37,15 @@ class FarmService
         if (!$farm) {
             return null;
         }
-        $farm->update($data);
+        $farm->name = $data['name'];
+        $farm->city = $data['city'];
+        $farm->location = $data['location'];
+        $farm->postal_code = $data['postal_code'];
+        $farm->capacity = $data['capacity'];
+        $farm->user_id = auth()->user()->id;
+        $farm->animal_types = json_encode($data['animal_types']);
+        $farm->animal_breeds = json_encode($data['animal_breeds']);
+        $farm->save();
         return $farm;
     }
 

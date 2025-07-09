@@ -19,6 +19,8 @@ class FarmFactory extends Factory
             'location' => $this->faker->address,
             'postal_code' => $this->faker->postcode,
             'capacity' => $this->faker->numberBetween(10, 1000),
+            'animal_types' => $this->faker->randomElement(['Cattle', 'Sheep', 'Goat', 'Pig', 'Chicken']),
+            'animal_breeds' => $this->faker->randomElement(['Holstein', 'Angus', 'Hereford', 'Jersey', 'Brahman']),
             'created_at' => $date,
             'updated_at' => $date,
         ];
