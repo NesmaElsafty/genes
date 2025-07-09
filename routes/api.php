@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\FarmController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/request-reset', [AuthController::class, 'requestReset']);
@@ -11,7 +14,11 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::apiResource('users', \App\Http\Controllers\UserController::class);
-    Route::apiResource('roles', \App\Http\Controllers\RoleController::class);
-    Route::apiResource('farms', \App\Http\Controllers\FarmController::class);
+    Route::apiResource('users', UserController::class);
+    Route::post('/usersBulk-delete', [UserController::class, 'bulkDelete']);
+    Route::post('/usersBulk-toggle', [UserController::class, 'bulkToggle']);
+    Route::post('/usersToggle', [UserController::class, 'toggle']);
+    Route::post('/usersExportSheet', [UserController::class, 'exportSheet']);
+    Route::apiResource('roles', RoleController::class);
+    Route::apiResource('farms', FarmController::class);
 }); 

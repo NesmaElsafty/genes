@@ -18,14 +18,15 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $users = $this->userService->getAllUsers()->paginate(10);
+            $users = $this->userService->getAllUsers($request->all())->paginate(10);
             return response()->json([
                 'status' => true,
                 'message' => 'Users fetched successfully',
                 'data' => UserResource::collection($users),
+                'stats' => $this->userService->stats(),
                 'pagination' => PaginationHelper::paginate($users),
             ]);
         } catch (\Exception $e) {
@@ -168,6 +169,115 @@ class UserController extends Controller
                 [
                     'status' => false,
                     'message' => $e->getMessage(),
+                ],
+                500,
+            );
+        }
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        try {
+            $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'required|exists:users,id',
+            ]);
+            $this->userService->bulkDelete($request->ids);
+            return response()->json(
+                [
+                    'status' => true,
+                    'message' => 'Users deleted successfully',
+                ],
+                200,
+            );
+        } catch (\Exception $e) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $e->getMessage(),
+                ],
+                500,
+            );
+        }
+    }
+
+    // activate and deactivate
+    public function toggle($id)
+    {
+        try {
+            $this->userService->toggleUser($id);
+            return response()->json(
+                [
+                    'status' => true,
+                    'message' => 'User Activation/Deactivation successfully',
+                ],
+                200,
+            );
+        } catch (\Exception $e) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $e->getMessage(),
+                ],
+                500,
+            );
+        }
+    }
+
+    // bulk activate and deactivate
+    public function bulkToggle(Request $request)
+    {
+        try {
+            $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'required|exists:users,id',
+            ]);
+            $this->userService->bulkToggle($request->ids);
+            return response()->json(
+                [
+                    'status' => true,
+                    'message' => 'Users Activation/Deactivation successfully',
+                ],
+                200,
+            );
+        } catch (\Exception $e) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $e->getMessage(),
+                ],
+                500,
+            );
+        }
+    }
+
+        // export sheet
+        public function exportSheet(Request $request)
+    {
+        try {
+            $authUser = auth()->user();
+
+            $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'required|exists:users,id',
+            ]);
+
+            $filePath = $this->userService->exportSheet($request->ids, $authUser, $request->role);
+            $filePath = str_replace('public/', '', $filePath);
+            return response()->json(
+                [
+                    'status' => true,
+                    'message' => 'تم تصدير المستخدمين بنجاح',
+                    'data' => $filePath,
+                ],
+                200,
+            );
+        } catch (\Throwable $e) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $e->getMessage(),
+                    'data' => null,
                 ],
                 500,
             );
