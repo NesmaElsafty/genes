@@ -19,12 +19,20 @@ class UserService
 
     public function createUser($data)
     {
+        $role = $data['role'] ?? null;
+        unset($data['role']);
         $data['password'] = Hash::make($data['password']);
-        return User::create($data);
+        $user = User::create($data);
+        if ($role) {
+            $user->syncRoles([$role]);
+        }
+        return $user;
     }
 
     public function updateUser($id, $data)
     {
+        $role = $data['role'] ?? null;
+        unset($data['role']);
         $user = User::find($id);
         if (!$user) {
             return null;
@@ -35,6 +43,9 @@ class UserService
             unset($data['password']);
         }
         $user->update($data);
+        if ($role) {
+            $user->syncRoles([$role]);
+        }
         return $user;
     }
 

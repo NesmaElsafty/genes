@@ -9,12 +9,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
         public function login(Request $request)
     {
+        try {
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -30,22 +32,51 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token,
+            'user' => new UserResource($user),
         ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function user(Request $request)
     {
-        return response()->json($request->user());
+        try {
+            return response()->json(
+                [
+                    'status' => true,
+                    'message' => 'User fetched successfully',
+                    'data' => new UserResource($request->user()),
+                ],
+                200,
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Logged out']);
+        try {
+            $request->user()->currentAccessToken()->delete();
+            return response()->json(['message' => 'Logged out']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function requestReset(Request $request)
     {
+        try {
         $request->validate([
             'email' => 'required|email|exists:users,email',
         ]);
@@ -70,10 +101,17 @@ class AuthController extends Controller
         });
 
         return response()->json(['message' => 'OTP sent to your email.']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function verifyOtp(Request $request)
     {
+        try {
         $request->validate([
             'email' => 'required|email|exists:users,email',
             'otp' => 'required',
@@ -93,10 +131,17 @@ class AuthController extends Controller
         DB::table('password_otps')->where('email', $request->email)->update(['verified' => true]);
 
         return response()->json(['message' => 'OTP verified. You can now reset your password.']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function resetPassword(Request $request)
     {
+        try {
         $request->validate([
             'email' => 'required|email|exists:users,email',
             'password' => 'required|string|min:6|confirmed',
@@ -120,5 +165,11 @@ class AuthController extends Controller
         DB::table('password_otps')->where('email', $request->email)->delete();
 
         return response()->json(['message' => 'Password reset successful.']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 } 

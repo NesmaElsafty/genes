@@ -1,35 +1,35 @@
 {
   "info": {
-    "name": "User CRUD API",
-    "_postman_id": "user-crud-collection",
-    "description": "Test collection for user CRUD endpoints.",
+    "name": "Role CRUD API",
+    "_postman_id": "role-crud-collection",
+    "description": "Test collection for role CRUD endpoints.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "Get All Users",
+      "name": "Get All Roles",
       "request": {
         "method": "GET",
         "header": [
           { "key": "Accept", "value": "application/json" },
           { "key": "Authorization", "value": "Bearer {{access_token}}" }
         ],
-        "url": { "raw": "http://localhost:8000/api/users", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "users"] }
+        "url": { "raw": "http://localhost:8000/api/roles", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "roles"] }
       }
     },
     {
-      "name": "Get User By ID",
+      "name": "Get Role By ID",
       "request": {
         "method": "GET",
         "header": [
           { "key": "Accept", "value": "application/json" },
           { "key": "Authorization", "value": "Bearer {{access_token}}" }
         ],
-        "url": { "raw": "http://localhost:8000/api/users/1", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "users", "1"] }
+        "url": { "raw": "http://localhost:8000/api/roles/1", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "roles", "1"] }
       }
     },
     {
-      "name": "Create User",
+      "name": "Create Role",
       "request": {
         "method": "POST",
         "header": [
@@ -39,14 +39,14 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"testuser@example.com\",\n  \"phone\": \"1234567890\",\n  \"is_active\": true,\n  \"password\": \"password\",\n  \"role\": \"client\"\n}",
+          "raw": "{\n  \"name\": \"manager\",\n  \"permissions\": [\"add animals\", \"view health\"]\n}",
           "options": { "raw": { "language": "json" } }
         },
-        "url": { "raw": "http://localhost:8000/api/users", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "users"] }
+        "url": { "raw": "http://localhost:8000/api/roles", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "roles"] }
       }
     },
     {
-      "name": "Update User",
+      "name": "Update Role",
       "request": {
         "method": "PUT",
         "header": [
@@ -56,21 +56,21 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"Updated User\",\n  \"phone\": \"9876543210\",\n  \"is_active\": false,\n  \"role\": \"admin\"\n}",
+          "raw": "{\n  \"name\": \"updated-manager\",\n  \"permissions\": [\"add animals\"]\n}",
           "options": { "raw": { "language": "json" } }
         },
-        "url": { "raw": "http://localhost:8000/api/users/1", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "users", "1"] }
+        "url": { "raw": "http://localhost:8000/api/roles/1", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "roles", "1"] }
       }
     },
     {
-      "name": "Delete User",
+      "name": "Delete Role",
       "request": {
         "method": "DELETE",
         "header": [
           { "key": "Accept", "value": "application/json" },
           { "key": "Authorization", "value": "Bearer {{access_token}}" }
         ],
-        "url": { "raw": "http://localhost:8000/api/users/1", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "users", "1"] }
+        "url": { "raw": "http://localhost:8000/api/roles/1", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "roles", "1"] }
       }
     }
   ]
