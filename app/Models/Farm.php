@@ -11,19 +11,15 @@ class Farm extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
 
-    protected $fillable = [
-        'name',
-        'user_id',
-        'city',
-        'location',
-        'postal_code',
-        'capacity',
-        'animal_type_name',
-        'animal_breed_name',
-    ];
+    protected $guarded = [];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function animals()
+    {
+        return $this->hasMany(Animal::class);
     }
 }

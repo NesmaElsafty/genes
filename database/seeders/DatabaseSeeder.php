@@ -43,6 +43,7 @@ class DatabaseSeeder extends Seeder
             AnimalTypeSeeder::class,
             AnimalBreedSeeder::class,
             EventTypeSeeder::class,
+            AnimalSeeder::class,
         ]);
         // Create 10 users and assign roles
         $users = \App\Models\User::factory(10)->create();

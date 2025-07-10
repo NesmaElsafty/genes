@@ -8,6 +8,7 @@ use App\Http\Controllers\FarmController;
 use App\Http\Controllers\AnimalTypeController;
 use App\Http\Controllers\AnimalBreedController;
 use App\Http\Controllers\EventTypeController;
+use App\Http\Controllers\AnimalController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/request-reset', [AuthController::class, 'requestReset']);
@@ -32,9 +33,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('farms', FarmController::class);
     Route::apiResource('animal-types', AnimalTypeController::class);
     Route::apiResource('animal-breeds', AnimalBreedController::class);
-    Route::apiResource('event-types', \App\Http\Controllers\EventTypeController::class);
+    Route::apiResource('event-types', EventTypeController::class);
 
     // animals 
     // events
     Route::apiResource('events', EventTypeController::class);
+    Route::apiResource('animals', AnimalController::class);
 }); 
