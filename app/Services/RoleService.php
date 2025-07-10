@@ -19,9 +19,7 @@ class RoleService
     public function create($data)
     {
         $role = Role::create(['name' => $data['name']]);
-        if (isset($data['permissions'])) {
-            $role->syncPermissions($data['permissions']);
-        }
+        $role->syncPermissions($data['permissions']);
         return $role->load('permissions');
     }
 
