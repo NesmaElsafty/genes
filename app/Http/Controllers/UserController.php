@@ -262,7 +262,7 @@ class UserController extends Controller
                 'ids.*' => 'required|exists:users,id',
             ]);
 
-            $filePath = $this->userService->exportSheet($request->ids, $authUser, $request->role);
+            $filePath = $this->userService->exportSheet($request->ids, $authUser);
             $filePath = str_replace('public/', '', $filePath);
             return response()->json(
                 [
@@ -272,7 +272,7 @@ class UserController extends Controller
                 ],
                 200,
             );
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
             return response()->json(
                 [
                     'status' => false,
