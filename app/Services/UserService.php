@@ -72,7 +72,7 @@ class UserService
         $user->name = $data['name'];
         $user->email = $data['email'];
         $user->phone = $data['phone'];
-        $user->password = Hash::make("123456");
+        $user->password = Hash::make('12345678');
         $user->is_active = $data['is_active'] ?? true;
         // $user->is_blocked = $data['is_blocked'] ?? false;
 
