@@ -22,6 +22,9 @@ class FarmController extends Controller
     {
         try {
             $farms = $this->farmService->getAllFarms(10);
+            if(!auth()->user()->hasRole('admin')){
+                $farms = $this->farmService->getAllUserFarms(auth()->user()->id, 10);
+            }
             return response()->json([
                 'status' => true,
                 'message' => 'Farms fetched successfully',
@@ -37,6 +40,14 @@ class FarmController extends Controller
                 500,
             );
         }
+    }
+
+    // selectable farms
+    public function selectableFarms(Request $request)
+    {
+            $farms = $this->farmService->selectableFarms();
+            return response()->json(['status' => true, 'message' => 'Selectable farms fetched successfully', 'data' => $farms]);
+        
     }
 
     public function show($id)
@@ -68,9 +79,9 @@ class FarmController extends Controller
 
     public function store(Request $request)
     {
+        
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'user_id' => 'required|exists:users,id',
             'city' => 'required|string|max:255',
             'location' => 'required|string|max:255',
             'postal_code' => 'required|string|max:20',
@@ -80,6 +91,11 @@ class FarmController extends Controller
         ]);
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $authUser = auth()->user();
+        if (!$authUser->hasRole('admin')) {
+            return response()->json(['status' => false, 'message' => 'You are not authorized to create a farm'], 403);
         }
         try {
             $farm = $this->farmService->createFarm($request->all());
@@ -93,7 +109,6 @@ class FarmController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|required|string|max:255',
-            'user_id' => 'sometimes|required|exists:users,id',
             'city' => 'sometimes|required|string|max:255',
             'location' => 'sometimes|required|string|max:255',
             'postal_code' => 'sometimes|required|string|max:20',

@@ -44,21 +44,22 @@ class DatabaseSeeder extends Seeder
             AnimalBreedSeeder::class,
             EventTypeSeeder::class,
             AnimalSeeder::class,
+            EventSeeder::class,
         ]);
         // Create 10 users and assign roles
-        $users = \App\Models\User::factory(10)->create();
-        $roles = [
-            'admin',
-            'client',
-        ];
-        foreach ($users as $i => $user) {
-            $role = $roles[$i < 5 ? 0 : 1];
-            $user->syncRoles([$role]);
-            // Each user gets 2 farms
-            if ($role == 'client') {
-                $user->farms()->saveMany(\App\Models\Farm::factory(2)->make());
-            }
-        }
+        $users = User::factory(10)->create();
+        // $roles = [
+        //     'admin',
+        //     'client',
+        // ];
+        // foreach ($users as $i => $user) {
+        //     $role = $roles[$i < 5 ? 0 : 1];
+        //     $user->syncRoles([$role]);
+        //     // Each user gets 2 farms
+        //     if ($role == 'client') {
+        //         $user->farms()->saveMany(\App\Models\Farm::factory(2)->make());
+        //     }
+        // }
 
     }
 }

@@ -7,6 +7,7 @@ use App\Http\Resources\AnimalResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\PaginationHelper;
 
 class AnimalController extends Controller
 {
@@ -17,6 +18,7 @@ class AnimalController extends Controller
             'status' => true,
             'message' => 'Animals fetched successfully',
             'data' => AnimalResource::collection($animals),
+            'pagination' => PaginationHelper::paginate($animals),
         ]);
     }
 

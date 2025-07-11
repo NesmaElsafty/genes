@@ -64,54 +64,98 @@ class UserService
 
     public function createUser($data)
     {
+        // dd($data);
         $role = $data['role'] ?? null;
         unset($data['role']);
-        $data['password'] = Hash::make($data['password']);
-        $user = User::create($data);
+        
+        $user = new User();
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+        $user->phone = $data['phone'];
+        $user->password = Hash::make("123456");
+        $user->is_active = $data['is_active'] ?? true;
+        // $user->is_blocked = $data['is_blocked'] ?? false;
+
+        $user->save();
+
+
         if ($role) {
             $user->syncRoles([$role]);
+        }
+        if (isset($data['farm_ids'])) {
+            
+            $user->farms()->attach($data['farm_ids']);
         }
         return $user;
     }
 
     public function updateUser($id, $data)
     {
-        $role = $data['role'] ?? null;
-        unset($data['role']);
         $user = User::find($id);
-        if (!$user) {
-            return null;
+
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+        $user->phone = $data['phone'];
+        $user->is_active = $data['is_active'] ?? true;
+        $user->save();
+
+        if (isset($data['role'])) {
+            $user->syncRoles([$data['role']]);
         }
-        if (isset($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
-            unset($data['password']);
-        }
-        $user->update($data);
-        if ($role) {
-            $user->syncRoles([$role]);
+
+        if (isset($data['farm_ids'])) {
+            $user->farms()->sync($data['farm_ids']);
         }
         return $user;
     }
 
-    public function deleteUser($id)
+    // block list
+    public function blockList()
+    {
+        return User::where('is_blocked', true);
+    }
+
+    public function blockUser($id)
     {
         $user = User::find($id);
         if (!$user) {
             return false;
         }
-        return $user->delete();
+
+        $user->is_blocked = true;
+        $user->save();
+        return $user;
     }
 
-    // users bulk delete
-    public function bulkDelete($ids)
+    // users bulk block
+    public function bulkBlock($ids)
     {
         foreach ($ids as $id) {
-            $this->deleteUser($id);
+            $this->blockUser($id);
         }
         return true;
     }
 
+    // unblock user
+    public function unblockUser($id)
+    {
+        $user = User::find($id);
+        if (!$user) {
+            return false;
+        }
+        $user->is_blocked = false;
+        $user->save();
+        return $user;
+    }
+
+    // bulk unblock users
+    public function bulkUnblock($ids)
+    {
+        foreach ($ids as $id) {
+            $this->unblockUser($id);
+        }
+        return true;
+    }
     // users activate and deactivate toggle
     public function toggleUser($id)
     {

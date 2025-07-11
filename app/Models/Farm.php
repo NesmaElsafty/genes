@@ -13,9 +13,9 @@ class Farm extends Model implements HasMedia
 
     protected $guarded = [];
 
-    public function user()
+    public function users()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsToMany(User::class, 'farm_user', 'farm_id', 'user_id');
     }
 
     public function animals()

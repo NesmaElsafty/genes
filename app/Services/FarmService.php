@@ -11,6 +11,12 @@ class FarmService
         return Farm::paginate($perPage);
     }
 
+    // selectable farms
+    public function selectableFarms()
+    {
+        return Farm::select('id', 'name')->get();
+    }
+
     public function getFarmById($id)
     {
         return Farm::find($id);
@@ -24,7 +30,7 @@ class FarmService
         $farm->location = $data['location'];
         $farm->postal_code = $data['postal_code'];
         $farm->capacity = $data['capacity'];
-        $farm->user_id = auth()->user()->id;
+        $farm->user_id = null;
         $farm->animal_types = json_encode($data['animal_types']);
         $farm->animal_breeds = json_encode($data['animal_breeds']);
         $farm->save();
@@ -56,5 +62,12 @@ class FarmService
             return false;
         }
         return $farm->delete();
+    }
+
+    public function getAllUserFarms($userId, $perPage = 10)
+    {
+        return Farm::whereHas('users', function($query) use ($userId){
+            $query->where('users.id', $userId);
+        })->paginate($perPage);
     }
 } 

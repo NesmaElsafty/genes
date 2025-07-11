@@ -9,6 +9,8 @@ use App\Http\Controllers\AnimalTypeController;
 use App\Http\Controllers\AnimalBreedController;
 use App\Http\Controllers\EventTypeController;
 use App\Http\Controllers\AnimalController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\EventController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/request-reset', [AuthController::class, 'requestReset']);
@@ -18,25 +20,36 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::middleware('auth:sanctum')->group(function () {
    
     // user routes
-    Route::get('/user', [AuthController::class, 'user']);
+    Route::get('/user', [AuthController::class, 'user'])->middleware('role:admin');
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::apiResource('users', UserController::class);
-    Route::post('/usersBulk-delete', [UserController::class, 'bulkDelete']);
-    Route::post('/usersBulk-toggle', [UserController::class, 'bulkToggle']);
-    Route::post('/usersToggle', [UserController::class, 'toggle']);
-    Route::post('/usersExportSheet', [UserController::class, 'exportSheet']);
-
+    Route::post('/usersBulk-delete', [UserController::class, 'bulkDelete'])->middleware('role:admin');
+    Route::post('/usersBulk-toggle', [UserController::class, 'bulkToggle'])->middleware('role:admin');
+    Route::post('/usersToggle', [UserController::class, 'toggle'])->middleware('role:admin');
+    Route::post('/usersExportSheet', [UserController::class, 'exportSheet'])->middleware('role:admin');
+    // block list
+    Route::get('/blockList', [UserController::class, 'blockList'])->middleware('role:admin');
+    Route::post('/userBlock', [UserController::class, 'block'])->middleware('role:admin');
+    Route::post('/userBulkBlock', [UserController::class, 'bulkBlock'])->middleware('role:admin');
+    Route::post('/userUnblock', [UserController::class, 'unblock'])->middleware('role:admin');
+    Route::post('/userBulkUnblock', [UserController::class, 'bulkUnblock'])->middleware('role:admin');
     // role routes
-    Route::apiResource('roles', RoleController::class);
+    Route::apiResource('roles', RoleController::class)->middleware('role:admin');
     
     // farm routes
-    Route::apiResource('farms', FarmController::class);
-    Route::apiResource('animal-types', AnimalTypeController::class);
-    Route::apiResource('animal-breeds', AnimalBreedController::class);
-    Route::apiResource('event-types', EventTypeController::class);
+    
+    Route::apiResource('farms', FarmController::class)->middleware('role:admin');
+    // only admin can access this route
+    Route::get('/selectableFarms', [FarmController::class, 'selectableFarms'])->middleware('role:admin');
+    Route::apiResource('animal-types', AnimalTypeController::class)->middleware('role:client');
+    Route::apiResource('animal-breeds', AnimalBreedController::class)->middleware('role:client');
+    Route::apiResource('event-types', EventTypeController::class)->middleware('role:client');
 
     // animals 
     // events
-    Route::apiResource('events', EventTypeController::class);
+    Route::apiResource('events', EventController::class);
     Route::apiResource('animals', AnimalController::class);
+
+    // home routes
+    Route::get('/homeAnimals', [HomeController::class, 'animals']);
 }); 

@@ -48,6 +48,6 @@ class User extends Authenticatable implements HasMedia
 
     public function farms()
     {
-        return $this->hasMany(Farm::class);
+        return $this->belongsToMany(Farm::class, 'farm_user', 'user_id', 'farm_id');
     }
 }
