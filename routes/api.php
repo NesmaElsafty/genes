@@ -11,6 +11,8 @@ use App\Http\Controllers\EventTypeController;
 use App\Http\Controllers\AnimalController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\FaqController;
+use App\Http\Controllers\TermController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/request-reset', [AuthController::class, 'requestReset']);
@@ -52,4 +54,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // home routes
     Route::get('/homeAnimals', [HomeController::class, 'animals']);
+    
+    // FAQ routes
+    Route::apiResource('faqs', FaqController::class);
+    Route::post('/faqsBulk-delete', [FaqController::class, 'bulkDelete']);
+    Route::post('/faqsBulk-toggle', [FaqController::class, 'bulkToggle']);
+    Route::post('/faqsToggle', [FaqController::class, 'toggle']);
+    
+    // Terms routes
+    Route::apiResource('terms', TermController::class);
+    Route::post('/termsBulk-delete', [TermController::class, 'bulkDelete']);
+    Route::post('/termsBulk-toggle', [TermController::class, 'bulkToggle']);
+    Route::post('/termsToggle', [TermController::class, 'toggle']);
+    Route::post('/termsExportSheet', [TermController::class, 'exportSheet']);
 }); 
