@@ -27,6 +27,7 @@ class Animal extends Model implements HasMedia
     {
         return $this->belongsTo(AnimalBreed::class, 'breed_id');
     }
+
 // نوع الحدث او الحاله
     public function eventType()
     {
@@ -41,5 +42,11 @@ class Animal extends Model implements HasMedia
     public function eventTypes()
     {
         return $this->belongsToMany(EventType::class, 'animal_event_type', 'animal_id', 'event_type_id');
+    }
+
+    // animal views
+    public function animalViews()
+    {
+        return $this->hasMany(AnimalView::class, 'animal_id');
     }
 } 

@@ -8,6 +8,7 @@ use App\Services\AnimalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\PaginationHelper;
+use App\Models\AnimalView;
 
 class AnimalController extends Controller
 {
@@ -61,6 +62,7 @@ class AnimalController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->file('images'));
         try {
             $validator = Validator::make($request->all(), [
                 'animal_id' => 'required|string|unique:animals,animal_id',

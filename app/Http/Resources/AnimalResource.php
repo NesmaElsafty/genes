@@ -24,6 +24,7 @@ class AnimalResource extends JsonResource
                     'url' => $media->getFullUrl(),
                 ];
             }),
+            'animal_views' => AnimalViewResource::collection($this->animalViews),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

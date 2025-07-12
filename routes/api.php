@@ -9,6 +9,7 @@ use App\Http\Controllers\AnimalTypeController;
 use App\Http\Controllers\AnimalBreedController;
 use App\Http\Controllers\EventTypeController;
 use App\Http\Controllers\AnimalController;
+use App\Http\Controllers\AnimalViewController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\FaqController;
@@ -50,6 +51,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // animals 
     Route::apiResource('animals', AnimalController::class);
     Route::get('/getAnimalsByGender', [AnimalController::class, 'getAnimalsByGender']);
+    
+    // animal views
+    Route::apiResource('animalViews', AnimalViewController::class);
+    Route::get('getByAnimal', [AnimalViewController::class, 'getByAnimal']);
+    // Route::get('/animalViewsSe', [AnimalViewController::class, 'search']);
     
     // events
     Route::apiResource('events', EventController::class);
