@@ -70,6 +70,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // home routes
     Route::get('/homeAnimals', [HomeController::class, 'animals']);
     Route::get('/clientStats', [HomeController::class, 'clientStats']);
+    Route::get('/animalEventTypeStats', [HomeController::class, 'animalEventTypeStats']);
+    Route::get('/animalBreedStats', [HomeController::class, 'animalBreedStats']);
+    Route::get('/selectableFarms', [HomeController::class, 'selectableFarms']);
     // FAQ routes
     Route::apiResource('faqs', FaqController::class);
     Route::post('/faqsBulk-delete', [FaqController::class, 'bulkDelete']);
