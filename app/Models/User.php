@@ -50,4 +50,16 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->belongsToMany(Farm::class, 'farm_user', 'user_id', 'farm_id');
     }
+
+    public function notifications()
+    {
+        return $this->belongsToMany(Notification::class, 'notification_user')
+                    ->withPivot('is_sent', 'sent_at')
+                    ->withTimestamps();
+    }
+
+    public function alerts()
+    {
+        return $this->hasMany(Alert::class);
+    }
 }

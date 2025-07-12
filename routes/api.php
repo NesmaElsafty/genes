@@ -16,6 +16,8 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\TermController;
 use App\Http\Controllers\AdminHomeController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\AlertController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/request-reset', [AuthController::class, 'requestReset']);
@@ -95,4 +97,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/termsBulk-toggle', [TermController::class, 'bulkToggle']);
     Route::post('/termsToggle', [TermController::class, 'toggle']);
     Route::post('/termsExportSheet', [TermController::class, 'exportSheet']);
+    
+    // Notification routes
+    Route::apiResource('notifications', NotificationController::class);
+    Route::post('/notificationsBulk-delete', [NotificationController::class, 'bulkDelete']);
+    Route::post('/notificationsExportSheet', [NotificationController::class, 'exportSheet']);
+    Route::post('/notifications/{id}/send', [NotificationController::class, 'sendNotification']);
+    
+    // Alert routes
+    Route::get('/alerts', [AlertController::class, 'index']);
+    Route::get('/alerts/{id}', [AlertController::class, 'show']);
+    Route::post('/alerts/{id}/mark-read', [AlertController::class, 'markAsRead']);
+    Route::get('/alerts/unread-count', [AlertController::class, 'unreadCount']);
 }); 
