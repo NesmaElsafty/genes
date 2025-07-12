@@ -27,7 +27,7 @@ class EventTypeSeeder extends Seeder
         foreach ($events as $event) {
             $eventType = new EventType();
             $eventType->name = $event['name'];
-            $eventType->description = 'test description';
+            $eventType->description = 'وصف تجريبي';
             $eventType->save();
         }
     }

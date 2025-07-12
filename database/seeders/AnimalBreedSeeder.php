@@ -11,16 +11,16 @@ class AnimalBreedSeeder extends Seeder
     {
         // create 10 animal breeds without factory get example from animal type
         $animalBreeds = [
-            'Holstein',
-            'Angus',
-            'Hereford',
-            'Jersey',
-            'Brahman',
+            'هولشتاين',
+            'أنغوس',
+            'هيرفورد',
+            'جيرسي',
+            'براهمان',
         ];
         foreach ($animalBreeds as $animalBreed) {
             AnimalBreed::create([
                 'name' => $animalBreed,
-                'description' => 'test description',
+                'description' => 'وصف تجريبي',
             ]);
         }
     }

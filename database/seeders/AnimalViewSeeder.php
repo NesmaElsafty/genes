@@ -13,18 +13,11 @@ class AnimalViewSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get existing animals or create some if none exist
-        // $animals = Animal::all();
-        
-        // if ($animals->isEmpty()) {
-        //     $animals = Animal::factory(10)->create();
-        // }
-
-        // // Create animal views for each animal
-        // foreach ($animals as $animal) {
-        //     AnimalView::factory()->count(rand(1, 3))->create([
-        //         'animal_id' => $animal->id,
-        //     ]);
-        // }
+        $animals = Animal::all();
+        foreach ($animals as $animal) {
+            \App\Models\AnimalView::factory()->count(rand(1, 3))->create([
+                'animal_id' => $animal->id,
+            ]);
+        }
     }
 } 

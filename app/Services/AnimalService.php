@@ -11,19 +11,21 @@ class AnimalService
     public function getAllAnimals($data)
     {
         $query = Animal::with(['farm', 'event', 'breed']);
-        switch ($data['sorted_by']) {
-            case 'newest':
-                $query = $query->orderBy('created_at', 'desc');
-                break;
-            case 'oldest':
-                $query = $query->orderBy('created_at', 'asc');
-                break;
-            case 'name':
-                $query = $query->orderBy('name', 'asc');
-                break;
+        if (isset($data['sorted_by'])) {
+            switch ($data['sorted_by']) {
+                case 'newest':
+                    $query = $query->orderBy('created_at', 'desc');
+                    break;
+                case 'oldest':
+                    $query = $query->orderBy('created_at', 'asc');
+                    break;
+                case 'name':
+                    $query = $query->orderBy('name', 'asc');
+                    break;
+            }
         }
 
-        if ($data['search']) {
+        if (isset($data['search'])) {
             $query = $query
                 ->where('animal_id', 'like', '%' . $data['search'] . '%')
                 ->orWhere('sir_id', 'like', '%' . $data['search'] . '%')
@@ -43,7 +45,7 @@ class AnimalService
                 });
         }
 
-        if ($data['event_type_id']) {
+        if (isset($data['event_type_id'])) {
             $query->where('event_type_id', $data['event_type_id']);
         }
 
@@ -52,18 +54,17 @@ class AnimalService
 
     public function getAnimalsByFarmId($data, $farmIds)
     {
-        
         $query = Animal::with(['farm', 'event', 'breed'])->whereIn('farm_id', $farmIds);
 
-        if(isset($data['sorted_by'])){
-        switch ($data['sorted_by']) {
-            case 'newest':
-                $query = $query->orderBy('created_at', 'desc');
-                break;
-            case 'oldest':
-                $query = $query->orderBy('created_at', 'asc');
-                break;
-            case 'animal_id':
+        if (isset($data['sorted_by'])) {
+            switch ($data['sorted_by']) {
+                case 'newest':
+                    $query = $query->orderBy('created_at', 'desc');
+                    break;
+                case 'oldest':
+                    $query = $query->orderBy('created_at', 'asc');
+                    break;
+                case 'animal_id':
                     $query = $query->orderBy('animal_id', 'asc');
                     break;
             }
@@ -105,7 +106,7 @@ class AnimalService
     {
         // create all data except images and event_type_id
 
-        $animal = new Animal(); 
+        $animal = new Animal();
         $animal->animal_id = $data['animal_id'];
         $animal->sir_id = $data['sir_id'];
         $animal->dam_id = $data['dam_id'];
@@ -116,7 +117,6 @@ class AnimalService
         $animal->animal_type_id = $data['animal_type_id'];
         $animal->event_type_id = $data['event_type_id'];
         $animal->save();
-
 
         return $animal;
     }
@@ -134,7 +134,6 @@ class AnimalService
         $animal->animal_type_id = $data['animal_type_id'] ?? $animal->animal_type_id;
         $animal->event_type_id = $data['event_type_id'] ?? $animal->event_type_id;
         $animal->save();
-
 
         return $animal;
     }
@@ -161,7 +160,7 @@ class AnimalService
     public function getAnimalsByGender($gender)
     {
         $animals = Animal::select('id', 'animal_id');
-        if ($gender != null) {  
+        if ($gender != null) {
             $animals = $animals->where('gender', $gender);
         }
         return $animals->get();

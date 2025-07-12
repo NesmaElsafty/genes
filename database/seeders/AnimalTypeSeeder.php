@@ -10,16 +10,16 @@ class AnimalTypeSeeder extends Seeder
     public function run(): void
     {    
         $animalTypes = [
-            'Cattle',
-            'Sheep',
-            'Goat',
-            'Pig',
-            'Chicken',
+            'أبقار', // Cattle
+            'أغنام', // Sheep
+            'ماعز',  // Goat
+            'خنازير', // Pig
+            'دجاج',  // Chicken
         ];
         foreach ($animalTypes as $animalType) { 
             AnimalType::create([
                 'name' => $animalType,
-                'description' => 'test description',
+                'description' => 'وصف تجريبي',
             ]);
         }
     }

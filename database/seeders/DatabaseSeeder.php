@@ -43,6 +43,8 @@ class DatabaseSeeder extends Seeder
             AnimalTypeSeeder::class,
             AnimalBreedSeeder::class,
             EventTypeSeeder::class,
+            FarmSeeder::class,
+            
             // AnimalSeeder::class,
             // EventSeeder::class,
             // AnimalViewSeeder::class,
