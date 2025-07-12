@@ -15,6 +15,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\TermController;
+use App\Http\Controllers\AdminHomeController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/request-reset', [AuthController::class, 'requestReset']);
@@ -73,6 +74,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/animalEventTypeStats', [HomeController::class, 'animalEventTypeStats']);
     Route::get('/animalBreedStats', [HomeController::class, 'animalBreedStats']);
     Route::get('/selectableFarms', [HomeController::class, 'selectableFarms']);
+    Route::get('/latestAnimalEvents', [HomeController::class, 'latestAnimalEvents']);
+    
+    // admin home routes
+    Route::get('/adminStats', [AdminHomeController::class, 'stats']);
+    Route::get('/farmRegistrationTrends', [AdminHomeController::class, 'farmRegistrationTrends']);
+    Route::get('/userRegistrationTrends', [AdminHomeController::class, 'userRegistrationTrends']);
+    Route::get('/globalAnimalEventTypeStats', [AdminHomeController::class, 'globalAnimalEventTypeStats']);
+    Route::get('/globalAnimalBreedStats', [AdminHomeController::class, 'globalAnimalBreedStats']);
+    Route::get('/mostActiveFarms', [AdminHomeController::class, 'mostActiveFarms']);
     // FAQ routes
     Route::apiResource('faqs', FaqController::class);
     Route::post('/faqsBulk-delete', [FaqController::class, 'bulkDelete']);

@@ -188,4 +188,48 @@ class HomeController extends Controller
             );
         }
     }
+
+    // Get latest 3 animal events for dashboard
+    public function latestAnimalEvents()
+    {
+        try {
+            $authUser = auth()->user();
+            // Get all farm IDs for the user
+            $farmIds = \App\Models\FarmUser::where('user_id', $authUser->id)->pluck('farm_id');
+            // Get all animal IDs in those farms
+            $animalIds = \App\Models\Animal::whereIn('farm_id', $farmIds)->pluck('id');
+            // Get latest 3 events for those animals
+            $events = \App\Models\Event::with(['animal.farm.users'])
+                ->whereIn('animal_id', $animalIds)
+                ->orderByDesc('created_at')
+                ->take(3)
+                ->get();
+
+            $data = $events->map(function($event) {
+                $animal = $event->animal;
+                $farm = $animal?->farm;
+                // Get the first user with 'client' role (if any)
+                $client = $farm?->users?->first(function($user) { return $user->hasRole('client'); });
+                return [
+                    'event_id' => $event->id,
+                    'animal_id' => $animal?->animal_id,
+                    'farm_name' => $farm?->name,
+                    'client_name' => $client?->name,
+                    'event_type_name' => $event->eventType?->name,
+                    'created_at' => $event->created_at,
+                ];
+            });
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Latest animal events fetched successfully',
+                'data' => $data,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
