@@ -55,6 +55,7 @@ class AnimalService
         
         $query = Animal::with(['farm', 'event', 'breed'])->whereIn('farm_id', $farmIds);
 
+        if(isset($data['sorted_by'])){
         switch ($data['sorted_by']) {
             case 'newest':
                 $query = $query->orderBy('created_at', 'desc');
@@ -62,12 +63,13 @@ class AnimalService
             case 'oldest':
                 $query = $query->orderBy('created_at', 'asc');
                 break;
-            case 'name':
-                $query = $query->orderBy('name', 'asc');
-                break;
+            case 'animal_id':
+                    $query = $query->orderBy('animal_id', 'asc');
+                    break;
+            }
         }
 
-        if ($data['search']) {
+        if (isset($data['search'])) {
             $query = $query
                 ->where('animal_id', 'like', '%' . $data['search'] . '%')
                 ->orWhere('sir_id', 'like', '%' . $data['search'] . '%')
@@ -87,7 +89,7 @@ class AnimalService
                 });
         }
 
-        if ($data['event_type_id']) {
+        if (isset($data['event_type_id'])) {
             $query->where('event_type_id', $data['event_type_id']);
         }
 
