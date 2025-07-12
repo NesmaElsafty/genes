@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'info@saudinlfp.com',
             'phone' => '966536388495',
             'is_active' => true,
-            'password' => Hash::make('12345678'),
+            'password' => Hash::make('123456'),
         ]);
         $admin->syncRoles(['admin']);
 
@@ -43,8 +43,8 @@ class DatabaseSeeder extends Seeder
             AnimalTypeSeeder::class,
             AnimalBreedSeeder::class,
             EventTypeSeeder::class,
-            AnimalSeeder::class,
-            EventSeeder::class,
+            // AnimalSeeder::class,
+            // EventSeeder::class,
             FaqSeeder::class,
             TermSeeder::class,
         ]);

@@ -39,18 +39,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('roles', RoleController::class)->middleware('role:admin');
     
     // farm routes
-    
     Route::apiResource('farms', FarmController::class)->middleware('role:admin');
     // only admin can access this route
     Route::get('/selectableFarms', [FarmController::class, 'selectableFarms'])->middleware('role:admin');
-    Route::apiResource('animal-types', AnimalTypeController::class)->middleware('role:client');
-    Route::apiResource('animal-breeds', AnimalBreedController::class)->middleware('role:client');
-    Route::apiResource('event-types', EventTypeController::class)->middleware('role:client');
-
+    Route::apiResource('animal-types', AnimalTypeController::class);
+    Route::apiResource('animal-breeds', AnimalBreedController::class);
+    Route::apiResource('eventTypes', EventTypeController::class);
+    Route::post('/exportFarms',  [FarmController::class, 'exportFarms'])->middleware('role:admin');
+    
     // animals 
+    Route::apiResource('animals', AnimalController::class);
+    Route::get('/getAnimalsByGender', [AnimalController::class, 'getAnimalsByGender']);
+    
     // events
     Route::apiResource('events', EventController::class);
-    Route::apiResource('animals', AnimalController::class);
 
     // home routes
     Route::get('/homeAnimals', [HomeController::class, 'animals']);

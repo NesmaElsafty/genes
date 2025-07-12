@@ -21,7 +21,7 @@ class FarmController extends Controller
     public function index(Request $request)
     {
         try {
-            $farms = $this->farmService->getAllFarms(10);
+            $farms = $this->farmService->getAllFarms($request->all())->paginate(10);
             if(!auth()->user()->hasRole('admin')){
                 $farms = $this->farmService->getAllUserFarms(auth()->user()->id, 10);
             }
@@ -29,6 +29,7 @@ class FarmController extends Controller
                 'status' => true,
                 'message' => 'Farms fetched successfully',
                 'data' => FarmResource::collection($farms),
+                'stats' => $this->farmService->stats(),
                 'pagination' => PaginationHelper::paginate($farms),
             ]);
         } catch (\Exception $e) {
@@ -167,6 +168,17 @@ class FarmController extends Controller
                 ],
                 500,
             );
+        }
+    }
+
+    // export farms
+    public function exportFarms(Request $request)
+    {
+        try {
+            $farms = $this->farmService->exportSheet($request->all(), auth()->user());
+            return response()->json(['status' => true, 'message' => 'Farms exported successfully', 'data' => $farms]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'message' => 'Error exporting farms', 'error' => $e->getMessage()], 500);
         }
     }
 }

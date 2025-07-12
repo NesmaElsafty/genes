@@ -11,12 +11,14 @@ return new class extends Migration
         Schema::create('animals', function (Blueprint $table) {
             $table->id();
             $table->string('animal_id')->unique();
+            $table->date('birth_date')->nullable();
             $table->string('sir_id')->nullable();
             $table->string('dam_id')->nullable();
             $table->enum('gender', ['male', 'female']);
-            $table->foreignId('farm_id')->constrained('farms')->onDelete('cascade');
-            $table->foreignId('event_id')->constrained('event_types')->onDelete('cascade')->nullable();
-            $table->foreignId('breed_id')->constrained('animal_breeds')->onDelete('cascade')->nullable();
+            $table->foreignId('farm_id')->nullable()->constrained('farms')->onDelete('cascade');
+            $table->foreignId('animal_type_id')->nullable()->constrained('animal_types')->onDelete('cascade');
+            $table->foreignId('breed_id')->nullable()->constrained('animal_breeds')->onDelete('cascade');
+            $table->foreignId('event_type_id')->nullable()->constrained('event_types')->onDelete('cascade');
             $table->timestamps();
         });
     }

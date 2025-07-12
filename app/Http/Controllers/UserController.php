@@ -331,11 +331,15 @@ class UserController extends Controller
             $authUser = auth()->user();
 
             $request->validate([
-                'ids' => 'required|array',
-                'ids.*' => 'required|exists:users,id',
+                'ids' => 'nullable|array',
+                'ids.*' => 'nullable|exists:users,id',
             ]);
+            $ids = User::pluck('id')->toArray();
+            if ($request->ids) {
+                $ids = $request->ids;
+            }
 
-            $filePath = $this->userService->exportSheet($request->ids, $authUser);
+            $filePath = $this->userService->exportSheet($ids, $authUser);
             $filePath = str_replace('public/', '', $filePath);
             return response()->json(
                 [

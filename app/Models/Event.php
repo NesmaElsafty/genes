@@ -11,12 +11,7 @@ class Event extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
 
-    protected $fillable = [
-        'date',
-        'event_type_id',
-        'animal_id',
-        'note',
-    ];
+    protected $guarded = [];
 
     public function eventType()
     {

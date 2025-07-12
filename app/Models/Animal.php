@@ -11,28 +11,35 @@ class Animal extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
 
-    protected $fillable = [
-        'animal_id',
-        'sir_id',
-        'dam_id',
-        'gender',
-        'farm_id',
-        'event_id',
-        'breed_id',
-    ];
+    protected $guarded = [];
 
     public function farm()
     {
         return $this->belongsTo(Farm::class);
     }
-
+// حدث
     public function event()
     {
         return $this->belongsTo(EventType::class, 'event_id');
     }
-
+// سلاله
     public function breed()
     {
         return $this->belongsTo(AnimalBreed::class, 'breed_id');
+    }
+// نوع الحدث او الحاله
+    public function eventType()
+    {
+        return $this->belongsTo(EventType::class, 'event_type_id');
+    }
+// فئة الحيوان
+    public function animalType()
+    {
+        return $this->belongsTo(AnimalType::class, 'animal_type_id');
+    }
+
+    public function eventTypes()
+    {
+        return $this->belongsToMany(EventType::class, 'animal_event_type', 'animal_id', 'event_type_id');
     }
 } 

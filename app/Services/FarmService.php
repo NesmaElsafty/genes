@@ -3,12 +3,58 @@
 namespace App\Services;
 
 use App\Models\Farm;
+use App\Models\Event;
+use App\Models\Animal;
+use App\Helpers\ExportHelper;
 
 class FarmService
 {
-    public function getAllFarms($perPage = 10)
+    public function getAllFarms($data)
     {
-        return Farm::paginate($perPage);
+        $query = Farm::query();
+        if(isset($data['sorted_by'])){
+        switch ($data['sorted_by']) {
+            case 'newest':
+                $query = $query->orderBy('created_at', 'desc');
+                break;
+            case 'oldest':
+                $query = $query->orderBy('created_at', 'asc');
+                break;
+            case 'name':
+                $query = $query->orderBy('name', 'asc');
+                break;
+        }
+
+        if (isset($data['search'])) {
+            $query
+                ->where('name', 'like', '%' . $data['search'] . '%')
+                ->orWhere('city', 'like', '%' . $data['search'] . '%')
+                ->orWhere('location', 'like', '%' . $data['search'] . '%')
+                ->orWhere('postal_code', 'like', '%' . $data['search'] . '%')
+                ->orWhere('capacity', 'like', '%' . $data['search'] . '%')
+                ->orWhereHas('users', function ($query) use ($data) {
+                    $query->where('name', 'like', '%' . $data['search'] . '%');
+                })
+                ->orWhereHas('animals', function ($query) use ($data) {
+                    $query->where('name', 'like', '%' . $data['search'] . '%');
+                });
+        }
+        }
+
+        if (isset($data['event_type_id'])) {
+            $query->where('event_type_id', $data['event_type_id']);
+        }
+
+        return $query;
+    }
+
+    // stats
+    public function stats()
+    {
+        $totalFarms = Farm::count();
+        $totalAnimals = Animal::count();
+        $totalEvents = Event::count();
+        return ['total_farms' => $totalFarms, 'total_animals' => $totalAnimals, 'total_events' => $totalEvents];
     }
 
     // selectable farms
@@ -66,8 +112,42 @@ class FarmService
 
     public function getAllUserFarms($userId, $perPage = 10)
     {
-        return Farm::whereHas('users', function($query) use ($userId){
+        return Farm::whereHas('users', function ($query) use ($userId) {
             $query->where('users.id', $userId);
         })->paginate($perPage);
     }
-} 
+
+    public function exportSheet($ids, $user)
+    {
+        if (empty($ids)) {
+            // لو مفيش ids → نجيب كل المستخدمين باـ role المطلوب
+            $farms = Farm::all();
+        } else {
+            // لو فيه ids → نجيب فقط اللي اـ id بتاعه في القامة
+            $farms = Farm::whereIn('id', $ids)->get();
+        }
+
+        $csvData = [];
+
+        foreach ($farms as $farm) {
+            $csvData[] = [
+                'id' => $farm->id,
+                'name' => $farm->name,
+                'user_name' => $farm->users?->pluck('name'),
+                'city' => $farm->city,
+                'location' => $farm->location,
+                'postal_code' => $farm->postal_code,
+                'capacity' => $farm->capacity,
+                'animal_types' => $farm->animal_types,
+                'animal_breeds' => $farm->animal_breeds,
+                'created_at' => $farm->created_at,
+                'updated_at' => $farm->updated_at,
+            ];
+        }
+
+        $filename = 'farms_export_' . now()->format('Ymd_His') . '.csv';
+        $media = ExportHelper::exportToMedia($csvData, $user, 'exports', $filename);
+
+        return $media->getFullUrl();
+    }
+}

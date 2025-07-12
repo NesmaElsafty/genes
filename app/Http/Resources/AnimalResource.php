@@ -8,7 +8,6 @@ class AnimalResource extends JsonResource
 {
     public function toArray($request)
     {
-
         return [
             'id' => $this->id,
             'animal_id' => $this->animal_id,
@@ -18,7 +17,7 @@ class AnimalResource extends JsonResource
             'farm_id' => $this->farm?->name ?? $this->farm_id,
             'event_id' => $this->event?->name ?? $this->event_id,
             'breed_id' => $this->breed?->name ?? $this->breed_id,
-            'media' => $this->getMedia('files')->map(function ($media) {
+            'media' => $this->getMedia('images')->map(function ($media) {
                 return [
                     'id' => $media->id,
                     'file_name' => $media->file_name,
@@ -29,4 +28,4 @@ class AnimalResource extends JsonResource
             'updated_at' => $this->updated_at,
         ];
     }
-} 
+}

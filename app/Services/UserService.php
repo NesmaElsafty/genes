@@ -11,6 +11,7 @@ class UserService
     public function getAllUsers($data)
     {
         $query = User::query();
+        $query->where('is_blocked', false);
         if (isset($data['search'])) {
             // search in name, email, phone
             $query

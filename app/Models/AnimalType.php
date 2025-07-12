@@ -11,4 +11,9 @@ class AnimalType extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    public function animals()
+    {
+        return $this->hasMany(Animal::class);
+    }
 }
