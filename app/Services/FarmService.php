@@ -119,13 +119,10 @@ class FarmService
 
     public function exportSheet($ids, $user)
     {
-        if (empty($ids)) {
-            // لو مفيش ids → نجيب كل المستخدمين باـ role المطلوب
-            $farms = Farm::all();
-        } else {
-            // لو فيه ids → نجيب فقط اللي اـ id بتاعه في القامة
+        $farms = Farm::all();
+        if (isset($ids)) {
             $farms = Farm::whereIn('id', $ids)->get();
-        }
+        } 
 
         $csvData = [];
 

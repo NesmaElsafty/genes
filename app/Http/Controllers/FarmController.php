@@ -175,7 +175,7 @@ class FarmController extends Controller
     public function exportFarms(Request $request)
     {
         try {
-            $farms = $this->farmService->exportSheet($request->all(), auth()->user());
+            $farms = $this->farmService->exportSheet($request->ids, auth()->user());
             return response()->json(['status' => true, 'message' => 'Farms exported successfully', 'data' => $farms]);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'message' => 'Error exporting farms', 'error' => $e->getMessage()], 500);

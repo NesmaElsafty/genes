@@ -24,30 +24,30 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::middleware('auth:sanctum')->group(function () {
    
     // user routes
-    Route::get('/user', [AuthController::class, 'user'])->middleware('role:admin');
+    Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::apiResource('users', UserController::class);
-    Route::post('/usersBulk-delete', [UserController::class, 'bulkDelete'])->middleware('role:admin');
-    Route::post('/usersBulk-toggle', [UserController::class, 'bulkToggle'])->middleware('role:admin');
-    Route::post('/usersToggle', [UserController::class, 'toggle'])->middleware('role:admin');
-    Route::post('/usersExportSheet', [UserController::class, 'exportSheet'])->middleware('role:admin');
+    Route::post('/usersBulk-delete', [UserController::class, 'bulkDelete']);
+    Route::post('/usersBulk-toggle', [UserController::class, 'bulkToggle']);
+    Route::post('/usersToggle', [UserController::class, 'toggle']);
+    Route::post('/usersExportSheet', [UserController::class, 'exportSheet']);
     // block list
-    Route::get('/blockList', [UserController::class, 'blockList'])->middleware('role:admin');
-    Route::post('/userBlock', [UserController::class, 'block'])->middleware('role:admin');
-    Route::post('/userBulkBlock', [UserController::class, 'bulkBlock'])->middleware('role:admin');
-    Route::post('/userUnblock', [UserController::class, 'unblock'])->middleware('role:admin');
-    Route::post('/userBulkUnblock', [UserController::class, 'bulkUnblock'])->middleware('role:admin');
+    Route::get('/blockList', [UserController::class, 'blockList']);
+    Route::post('/userBlock', [UserController::class, 'block']);
+    Route::post('/userBulkBlock', [UserController::class, 'bulkBlock']);
+    Route::post('/userUnblock', [UserController::class, 'unblock']);
+    Route::post('/userBulkUnblock', [UserController::class, 'bulkUnblock']);
     // role routes
-    Route::apiResource('roles', RoleController::class)->middleware('role:admin');
+    Route::apiResource('roles', RoleController::class);
     
     // farm routes
-    Route::apiResource('farms', FarmController::class)->middleware('role:admin');
+    Route::apiResource('farms', FarmController::class);
     // only admin can access this route
-    Route::get('/selectableFarms', [FarmController::class, 'selectableFarms'])->middleware('role:admin');
+    Route::get('/selectableFarms', [FarmController::class, 'selectableFarms']);
     Route::apiResource('animal-types', AnimalTypeController::class);
     Route::apiResource('animal-breeds', AnimalBreedController::class);
     Route::apiResource('eventTypes', EventTypeController::class);
-    Route::post('/exportFarms',  [FarmController::class, 'exportFarms'])->middleware('role:admin');
+    Route::post('/exportFarms',  [FarmController::class, 'exportFarms']);
     
     // animals 
     Route::apiResource('animals', AnimalController::class);
@@ -69,7 +69,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // home routes
     Route::get('/homeAnimals', [HomeController::class, 'animals']);
-    
+    Route::get('/clientStats', [HomeController::class, 'clientStats']);
     // FAQ routes
     Route::apiResource('faqs', FaqController::class);
     Route::post('/faqsBulk-delete', [FaqController::class, 'bulkDelete']);

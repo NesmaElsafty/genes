@@ -19,7 +19,7 @@ class AnimalResource extends JsonResource
             'dam_id' => $this->dam_id,
             'gender' => $this->gender,
             'farm_id' => $this->farm?->name ?? $this->farm_id,
-            'current_event_type' => $this->animalEventHistory->last()->name ?? null,
+            'current_event_type' => $this->animalEventHistory->last()->name ?? $this->events->last()?->eventType?->name,
             'breed_id' => $this->breed?->name ?? $this->breed_id,
             // get media images urls only
             'images' => $this->getMedia('images')->map(function ($media) {

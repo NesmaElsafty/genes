@@ -25,6 +25,10 @@ class AnimalService
             }
         }
 
+        if (isset($data['gender'])) {
+            $query = $query->where('gender', $data['gender']);
+        }
+
         if (isset($data['search'])) {
             $query = $query
                 ->where('animal_id', 'like', '%' . $data['search'] . '%')
