@@ -10,10 +10,10 @@ return new class extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->id();
-            $table->date('date');
-            $table->foreignId('event_type_id')->constrained('event_types')->onDelete('cascade');
             $table->foreignId('animal_id')->constrained('animals')->onDelete('cascade');
-            $table->text('note')->nullable();
+            $table->date('date');
+            $table->foreignId('eventType_id')->constrained('event_types')->onDelete('cascade');
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

@@ -8,7 +8,8 @@ use App\Services\AnimalViewService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\PaginationHelper;
-
+use App\Models\Animal;
+use App\Models\AnimalEventType;
 class AnimalViewController extends Controller
 {
     protected $animalViewService;
@@ -33,7 +34,12 @@ class AnimalViewController extends Controller
 
         try {
             $animalView = $this->animalViewService->createAnimalView($request->all());
-
+            // add event type to animal event history
+            $animal = Animal::find($request->animal_id);
+            $animalEventType = new AnimalEventType();
+            $animalEventType->animal_id = $animal->id;
+            $animalEventType->name = 'external_chars';
+            $animalEventType->save();
             return response()->json([
                 'status' => true,
                 'message' => 'Animal view created successfully',
@@ -110,38 +116,15 @@ class AnimalViewController extends Controller
     public function getByAnimal($animalId)
     {
         try {
-            $animalViews = $this->animalViewService->getAnimalViewsByAnimal($animalId, 10);
+            $animalViews = $this->animalViewService->getAnimalViewsByAnimal($animalId);
             return response()->json([
                 'status' => true,
                 'message' => 'Animal views fetched successfully',
                 'data' => AnimalViewResource::collection($animalViews),
-                'pagination' => PaginationHelper::paginate($animalViews),
             ]);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    public function search(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'search' => 'required|string|min:1',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
-        }
-
-        try {
-            $animalViews = $this->animalViewService->searchAnimalViews($request->search, 10);
-            return response()->json([
-                'status' => true,
-                'message' => 'Animal views fetched successfully',
-                'data' => AnimalViewResource::collection($animalViews),
-                'pagination' => PaginationHelper::paginate($animalViews),
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
-        }
-    }
 } 

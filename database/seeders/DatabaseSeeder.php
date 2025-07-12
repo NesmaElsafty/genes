@@ -45,7 +45,8 @@ class DatabaseSeeder extends Seeder
             EventTypeSeeder::class,
             // AnimalSeeder::class,
             // EventSeeder::class,
-            AnimalViewSeeder::class,
+            // AnimalViewSeeder::class,
+            // AnimalMatingSeeder::class,
             FaqSeeder::class,
             TermSeeder::class,
         ]);

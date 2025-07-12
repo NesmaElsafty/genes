@@ -44,9 +44,31 @@ class Animal extends Model implements HasMedia
         return $this->belongsToMany(EventType::class, 'animal_event_type', 'animal_id', 'event_type_id');
     }
 
+    public function events()
+    {
+        return $this->hasMany(Event::class, 'animal_id');
+    }
+
+    public function animalEventHistory()
+    {
+        return $this->hasMany(AnimalEventType::class, 'animal_id');
+    }
+
     // animal views
     public function animalViews()
     {
         return $this->hasMany(AnimalView::class, 'animal_id');
+    }
+
+    // animal matings as sir
+    public function sirMatings()
+    {
+        return $this->hasMany(AnimalMating::class, 'sir_id');
+    }
+
+    // animal matings as dam
+    public function damMatings()
+    {
+        return $this->hasMany(AnimalMating::class, 'dam_id');
     }
 } 

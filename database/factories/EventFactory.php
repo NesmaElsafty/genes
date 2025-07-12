@@ -14,10 +14,10 @@ class EventFactory extends Factory
     public function definition(): array
     {
         return [
-            'date' => $this->faker->date(),
-            'event_type_id' => EventType::inRandomOrder()->first()?->id ?? EventType::factory(),
             'animal_id' => Animal::inRandomOrder()->first()?->id ?? Animal::factory(),
-            'note' => $this->faker->optional()->sentence(),
+            'date' => $this->faker->date(),
+            'eventType_id' => EventType::inRandomOrder()->first()?->id ?? EventType::factory(),
+            'notes' => $this->faker->sentence(),
         ];
     }
 } 

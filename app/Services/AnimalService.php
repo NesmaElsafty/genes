@@ -115,7 +115,6 @@ class AnimalService
         $animal->event_type_id = $data['event_type_id'];
         $animal->save();
 
-        $animal->eventTypes()->attach($data['event_type_id']);
 
         return $animal;
     }
@@ -123,18 +122,17 @@ class AnimalService
     public function updateAnimal($id, $data)
     {
         $animal = Animal::find($id);
-        $animal->animal_id = $data['animal_id'];
-        $animal->sir_id = $data['sir_id'];
-        $animal->dam_id = $data['dam_id'];
-        $animal->gender = $data['gender'];
-        $animal->birth_date = $data['birth_date'];
-        $animal->farm_id = $data['farm_id'];
-        $animal->breed_id = $data['breed_id'];
-        $animal->animal_type_id = $data['animal_type_id'];
-        $animal->event_type_id = $data['event_type_id'];
+        $animal->animal_id = $data['animal_id'] ?? $animal->animal_id;
+        $animal->sir_id = $data['sir_id'] ?? $animal->sir_id;
+        $animal->dam_id = $data['dam_id'] ?? $animal->dam_id;
+        $animal->gender = $data['gender'] ?? $animal->gender;
+        $animal->birth_date = $data['birth_date'] ?? $animal->birth_date;
+        $animal->farm_id = $data['farm_id'] ?? $animal->farm_id;
+        $animal->breed_id = $data['breed_id'] ?? $animal->breed_id;
+        $animal->animal_type_id = $data['animal_type_id'] ?? $animal->animal_type_id;
+        $animal->event_type_id = $data['event_type_id'] ?? $animal->event_type_id;
         $animal->save();
 
-        $animal->eventTypes()->sync($data['event_type_id']);
 
         return $animal;
     }
@@ -160,6 +158,10 @@ class AnimalService
 
     public function getAnimalsByGender($gender)
     {
-        return Animal::select('id', 'animal_id')->where('gender', $gender)->get();
+        $animals = Animal::select('id', 'animal_id');
+        if ($gender != null) {  
+            $animals = $animals->where('gender', $gender);
+        }
+        return $animals->get();
     }
 }

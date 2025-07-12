@@ -4,15 +4,9 @@ namespace App\Services;
 
 use App\Models\Event;
 use Illuminate\Support\Facades\DB;
-use App\Models\Animal;
 
 class EventService
 {
-    public function getAllEvents($perPage = 10)
-    {
-        return Event::with(['eventType', 'animal'])->paginate($perPage);
-    }
-
     public function getEventById($id)
     {
         return Event::with(['eventType', 'animal'])->find($id);
@@ -20,35 +14,43 @@ class EventService
 
     public function createEvent($data)
     {
-        DB::transaction(function () use ($data) {
-            $animal = Animal::where('animal_id', $data['animal_id'])->first();
-            $animalId = $animal->id;
-
-            $event = Event::create([
+        // update or create by animal_id and eventType_id
+        $event = Event::where([
+            'animal_id' => $data['animal_id'],
+            'eventType_id' => $data['eventType_id']
+        ])->first();
+        
+        if ($event) {
+            $event->update([
                 'date' => $data['date'],
-                'event_type_id' => $data['event_type_id'],
-                'animal_id' => $animalId,
-                'note' => $data['note'] ?? null,
+                'notes' => $data['notes'],
             ]);
-            return $event;
-        });
+        } else {
+            $event = Event::create([
+                'animal_id' => $data['animal_id'],
+                'date' => $data['date'],
+                'eventType_id' => $data['eventType_id'],
+                'notes' => $data['notes'],
+            ]);
+        }
+        return $event;
     }
 
-    public function updateEvent($id, $data, $files = null)
+    public function updateEvent($id, $data)
     {
-        return DB::transaction(function () use ($id, $data, $files) {
-            $event = Event::find($id);
-            if (!$event) {
-                return null;
-            }
-            $event->update([
-                'date' => $data['date'] ?? $event->date,
-                'event_type_id' => $data['event_type_id'] ?? $event->event_type_id,
-                'animal_id' => $data['animal_id'] ?? $event->animal_id,
-                'note' => $data['note'] ?? $event->note,
-            ]);
-            return $event;
-        });
+        $event = Event::find($id);
+        if (!$event) {
+            return null;
+        }
+        
+        $event->update([
+            'animal_id' => $data['animal_id'],
+            'date' => $data['date'],
+            'eventType_id' => $data['eventType_id'],
+            'notes' => $data['notes'],
+        ]);
+
+        return $event;
     }
 
     public function deleteEvent($id)
@@ -58,5 +60,10 @@ class EventService
             return false;
         }
         return $event->delete();
+    }
+
+    public function getEventsByAnimal($animalId)
+    {
+        return Event::where('animal_id', $animalId)->get();
     }
 }

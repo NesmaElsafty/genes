@@ -11,11 +11,20 @@ class Event extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'animal_id',
+        'date',
+        'eventType_id',
+        'notes',
+    ];
+
+    protected $casts = [
+        'date' => 'date',
+    ];
 
     public function eventType()
     {
-        return $this->belongsTo(EventType::class);
+        return $this->belongsTo(EventType::class, 'eventType_id');
     }
 
     public function animal()

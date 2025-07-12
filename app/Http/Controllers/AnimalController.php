@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\PaginationHelper;
 use App\Models\AnimalView;
-
+use App\Models\AnimalEventType;
 class AnimalController extends Controller
 {
     protected $animalService;
@@ -53,7 +53,8 @@ class AnimalController extends Controller
     public function getAnimalsByGender(Request $request)
     {
         try {
-            $animals = $this->animalService->getAnimalsByGender($request->gender);
+            $gender = $request->gender ?? null;
+            $animals = $this->animalService->getAnimalsByGender($gender);
             return response()->json(['status' => true, 'message' => 'Animals fetched successfully', 'data' => $animals]);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
@@ -81,6 +82,12 @@ class AnimalController extends Controller
             }
 
             $animal = $this->animalService->createAnimal($request->all());
+            // add event type to animal event history
+            $animalEventType = new AnimalEventType();
+            $animalEventType->animal_id = $animal->id;
+            $animalEventType->name = 'created';
+            $animalEventType->save();
+           
             // store images
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {

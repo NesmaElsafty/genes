@@ -12,8 +12,8 @@ class EventType extends Model
     protected $guarded = [];
     protected $table = 'event_types';
 
-    public function animals()
+    public function events()
     {
-        return $this->belongsToMany(Animal::class, 'animal_event_type', 'event_type_id', 'animal_id');
+        return $this->hasMany(Event::class, 'event_type_id');
     }
 } 
