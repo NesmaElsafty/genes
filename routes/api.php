@@ -90,7 +90,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/faqsBulk-delete', [FaqController::class, 'bulkDelete']);
     Route::post('/faqsBulk-toggle', [FaqController::class, 'bulkToggle']);
     Route::post('/faqsToggle', [FaqController::class, 'toggle']);
-    
+    Route::post('/faqsExportSheet', [FaqController::class, 'exportSheet']);
+
     // Terms routes
     Route::apiResource('terms', TermController::class);
     Route::post('/termsBulk-delete', [TermController::class, 'bulkDelete']);
