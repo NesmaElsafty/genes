@@ -11,9 +11,17 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\DB;
+use App\Services\UserService;
 
 class AuthController extends Controller
 {
+    protected $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
         public function login(Request $request)
     {
         try {
@@ -66,6 +74,45 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    // update profile
+
+    public function updateProfile(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $request->validate([
+                'name' => 'sometimes|required|string|max:255',
+                'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
+                'phone' => 'sometimes|required|string|max:20',
+                'password' => 'sometimes|nullable|string|min:6',
+            ]);
+
+            $user = $this->userService->updateUser($user->id, $request->all());
+            if (!$user) {
+                return response()->json(['error' => 'User not found'], 404);
+            }
+            $user->syncRoles([$request->role]);
+
+            return response()->json(
+                [
+                    'status' => true,
+                    'message' => 'User updated successfully',
+                    'data' => new UserResource($user),
+                ],
+                200,
+            );
+        } catch (\Exception $e) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $e->getMessage(),
+                ],
+                500,
+            );
+        }
+    }
+
 
     public function logout(Request $request)
     {

@@ -8,14 +8,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\PaginationHelper;
 use App\Http\Resources\FarmResource;
+use App\Services\AlertService;
+use App\Services\SettingService;
+use App\Models\User;
 
 class FarmController extends Controller
 {
     protected $farmService;
+    protected $alertService;
+    protected $settingService;
 
-    public function __construct(FarmService $farmService)
+    public function __construct(FarmService $farmService, AlertService $alertService, SettingService $settingService)
     {
         $this->farmService = $farmService;
+        $this->alertService = $alertService;
+        $this->settingService = $settingService;
     }
 
     public function index(Request $request)
@@ -131,6 +138,20 @@ class FarmController extends Controller
             $farm = $this->farmService->updateFarm($id, $request->all());
             if (!$farm) {
                 return response()->json(['status' => false, 'message' => 'Farm not found'], 404);
+            }
+
+            // send notification to admin
+            if ($this->settingService->notificationIsValid('farm_data_update')) {
+                $admins = User::where('role', 'admin')->get();
+                foreach ($admins as $admin) {
+                    // create alert
+                    $data = [
+                        'title' => 'تم تحديث بيانات المزرعة',
+                        'message' => 'تم تحديث بيانات المزرعة ' . $farm->name,
+                        'is_read' => false,
+                    ];
+                    $this->alertService->createAlert($data, $admin->id);
+                }
             }
             return response()->json(['status' => true, 'message' => 'Farm updated successfully', 'data' => $farm]);
         } catch (\Exception $e) {

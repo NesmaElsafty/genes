@@ -18,6 +18,7 @@ use App\Http\Controllers\TermController;
 use App\Http\Controllers\AdminHomeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AlertController;
+use App\Http\Controllers\SettingController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/request-reset', [AuthController::class, 'requestReset']);
@@ -28,6 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
    
     // user routes
     Route::get('/user', [AuthController::class, 'user']);
+    Route::post('/updateProfile', [AuthController::class, 'updateProfile']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::apiResource('users', UserController::class);
     Route::post('/usersBulk-delete', [UserController::class, 'bulkDelete']);
@@ -110,4 +112,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/alerts/{id}', [AlertController::class, 'show']);
     Route::post('/alerts/{id}/mark-read', [AlertController::class, 'markAsRead']);
     Route::get('/alerts/unread-count', [AlertController::class, 'unreadCount']);
+    
+    // Setting routes
+    Route::get('/settings', [SettingController::class, 'index']);
+    Route::get('/settings/{id}', [SettingController::class, 'show']);
+    Route::post('/settingsToggle', [SettingController::class, 'toggle']);
 }); 

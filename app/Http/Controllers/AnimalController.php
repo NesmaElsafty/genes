@@ -2,21 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Animal;
 use App\Http\Resources\AnimalResource;
 use App\Services\AnimalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\PaginationHelper;
-use App\Models\AnimalView;
 use App\Models\AnimalEventType;
+use App\Services\AlertService;
+use App\Services\SettingService;
+use App\Models\User;
+
 class AnimalController extends Controller
 {
     protected $animalService;
+    protected $alertService;
+    protected $settingService;
 
-    public function __construct(AnimalService $animalService)
+    public function __construct(AnimalService $animalService, AlertService $alertService, SettingService $settingService)
     {
         $this->animalService = $animalService;
+        $this->alertService = $alertService;
+        $this->settingService = $settingService;
     }
 
     public function index(Request $request)
@@ -87,11 +93,28 @@ class AnimalController extends Controller
             $animalEventType->animal_id = $animal->id;
             $animalEventType->name = 'created';
             $animalEventType->save();
-           
+
             // store images
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $animal->addMedia($image)->toMediaCollection('images');
+                }
+            }
+
+            // send notification to admin
+            if ($this->settingService->notificationIsValid('animal_registration')) {
+                // users that has role admin
+                $admins = User::whereHas('roles', function ($query) {
+                    $query->where('name', 'admin');
+                })->get();
+                foreach ($admins as $admin) {
+                    // create alert
+                    $data = [
+                        'title' => 'تم تسجيل حيوان جديد',
+                        'body' => 'تم تسجيل حيوان جديد داخل ' . $animal->farm->name . ' برقم ' . $animal->animal_id,
+                        'is_read' => false,
+                    ];
+                    $this->alertService->createAlert($data, $admin->id);
                 }
             }
 

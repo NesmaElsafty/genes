@@ -7,6 +7,18 @@ use Illuminate\Support\Facades\Auth;
 
 class AlertService
 {
+    public function createAlert($data, $userId)
+    {
+        $alert = new Alert();
+        $alert->user_id = $userId;
+        $alert->title = $data['title'];
+        $alert->body = $data['body'];
+        $alert->is_read = $data['is_read'];
+        $alert->save();
+
+        return $alert;
+    }
+
     public function getUserAlerts($userId)
     {
         return Alert::where('user_id', $userId)

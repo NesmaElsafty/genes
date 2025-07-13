@@ -9,13 +9,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Animal;
 use App\Models\AnimalEventType;
+use App\Services\AlertService;
+use App\Services\SettingService;
+use App\Models\User;
+
 class EventController extends Controller
 {
     protected $eventService;
+    protected $alertService;
+    protected $settingService;
 
-    public function __construct(EventService $eventService)
+    public function __construct(EventService $eventService, AlertService $alertService, SettingService $settingService)
     {
         $this->eventService = $eventService;
+        $this->alertService = $alertService;
+        $this->settingService = $settingService;
     }
 
     public function store(Request $request)
@@ -39,6 +47,22 @@ class EventController extends Controller
             $animalEventType->animal_id = $animal->id;
             $animalEventType->name = $event->eventType->name;
             $animalEventType->save();
+
+            $animal = Animal::find($request->animal_id);
+
+            // send notification to admin
+            if ($this->settingService->notificationIsValid('health_event_registration')) {
+                $admins = User::where('role', 'admin')->get();
+                foreach ($admins as $admin) {
+                    // create alert
+                    $data = [
+                        'title' => 'تم تسجيل حدث جديد',
+                        'message' => 'تم تسجيل حدث جديد داخل ' . $animal->farm->name . ' برقم ' . $animal->animal_id . ' بنوع ' . $event->eventType->name,
+                        'is_read' => false,
+                    ];
+                    $this->alertService->createAlert($data, $admin->id);
+                }
+            }
 
            
             return response()->json([

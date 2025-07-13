@@ -280,11 +280,12 @@ class TermController extends Controller
     {
         try {
             $ids = $request->ids;
-            $this->termService->exportSheet($ids, auth()->user());
+            $file_name = $this->termService->exportSheet($ids, auth()->user());
             return response()->json(
                 [
                     'status' => true,
                     'message' => 'Terms exported successfully',
+                    "data" => $file_name,
                 ],
                 200,
             );

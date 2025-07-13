@@ -45,14 +45,15 @@ class DatabaseSeeder extends Seeder
             EventTypeSeeder::class,
             FarmSeeder::class,
             
-            // AnimalSeeder::class,
-            // EventSeeder::class,
-            // AnimalViewSeeder::class,
-            // AnimalMatingSeeder::class,
+            AnimalSeeder::class,
+            EventSeeder::class,
+            AnimalViewSeeder::class,
+            AnimalMatingSeeder::class,
             FaqSeeder::class,
             TermSeeder::class,
             NotificationSeeder::class,
             AlertSeeder::class,
+            SettingSeeder::class,
         ]);
         // Create 10 users and assign roles
         $users = User::factory(10)->create();
