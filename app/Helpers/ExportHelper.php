@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use Barryvdh\DomPDF\Facade\Pdf;
+
 class ExportHelper
 {
     public static function exportToCsv(array $csvData, string $filename = null): string
@@ -34,6 +36,34 @@ class ExportHelper
             ->usingName(basename($filePath))
             ->toMediaCollection($collection);
         // No need to unlink($filePath) as Spatie handles it
+        return $media;
+    }
+
+    public static function exportToPdf(array $data, string $view, string $filename = null): string
+    {
+        if (empty($data)) {
+            throw new \Exception('No data to export.');
+        }
+
+        $filename = $filename ?? 'export_' . now()->format('Ymd_His') . '.pdf';
+        $tempPath = storage_path('app/tmp/' . $filename);
+
+        if (!file_exists(dirname($tempPath))) {
+            mkdir(dirname($tempPath), 0777, true);
+        }
+
+        $pdf = Pdf::loadView($view, ['data' => $data]);
+        $pdf->save($tempPath);
+
+        return $tempPath;
+    }
+
+    public static function exportPdfToMedia(array $data, string $view, $model, string $collection = 'exports', string $filename = null)
+    {
+        $filePath = self::exportToPdf($data, $view, $filename);
+        $media = $model->addMedia($filePath)
+            ->usingName(basename($filePath))
+            ->toMediaCollection($collection);
         return $media;
     }
 } 

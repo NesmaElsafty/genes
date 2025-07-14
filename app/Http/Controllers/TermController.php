@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\TermResource;
 use App\Helpers\PaginationHelper;
+use Mpdf\Mpdf;
 
 class TermController extends Controller
 {
@@ -279,16 +280,41 @@ class TermController extends Controller
     public function exportSheet(Request $request)
     {
         try {
-            $ids = $request->ids;
-            $file_name = $this->termService->exportSheet($ids, auth()->user());
-            return response()->json(
-                [
-                    'status' => true,
-                    'message' => 'Terms exported successfully',
-                    "data" => $file_name,
-                ],
-                200,
-            );
+            $term = $this->termService->getTermById($request->id);
+            if (!$term) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'message' => 'Term not found',
+                    ],
+                    404,
+                );
+            }
+            $data = [
+            'type' => $term->type,
+            'title' => $term->title,
+            'description' => $term->description,
+            'created_at' => $term->created_at,
+        ];
+
+        $html = view('exports.pdf_table', compact('data'))->render();
+
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'default_font' => 'dejavusans',
+            'directionality' => 'rtl',
+            'autoScriptToLang' => true,
+            'autoLangToFont' => true,
+        ]);
+
+        $mpdf->WriteHTML($html);
+
+        return response($mpdf->Output('export.pdf', 'S'), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="export.pdf"'
+        ]);
+            
         } catch (\Exception $e) {
             return response()->json(
                 [

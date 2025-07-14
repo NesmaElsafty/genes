@@ -8,20 +8,36 @@ use App\Models\User;
 use App\Models\Animal;
 use App\Models\EventType;
 use App\Models\Event;
+use App\Models\AnimalBreed;
 class AdminHomeController extends Controller
 {
-    //
+    // Helper to apply date filter
+    private function applyDateFilter($query, $request, $column = 'created_at')
+    {
+        if ($request->filled('from') && $request->filled('to')) {
+            $query->whereBetween($column, [$request->from, $request->to]);
+        }
+        return $query;
+    }
+
     // stats for admin home page
-    public function stats()
+    public function stats(Request $request)
     {
         try {
-            $totalFarms = Farm::count();
-            // get users where has role not admin
-            $totalUsers = User::whereHas('roles', function ($query) {
-                $query->where('name', '!=', 'admin');
-            })->count();
-            // get animals where has farm
-            $totalAnimals = Animal::count();
+            $farmsQuery = $this->applyDateFilter(Farm::query(), $request);
+            $totalFarms = $farmsQuery->count();
+
+            $usersQuery = $this->applyDateFilter(
+                User::whereHas('roles', function ($query) {
+                    $query->where('name', '!=', 'admin');
+                }),
+                $request,
+            );
+            $totalUsers = $usersQuery->count();
+
+            $animalsQuery = $this->applyDateFilter(Animal::query(), $request);
+            $totalAnimals = $animalsQuery->count();
+
             return response()->json([
                 'status' => true,
                 'message' => 'Stats fetched successfully',
@@ -47,41 +63,59 @@ class AdminHomeController extends Controller
     {
         try {
             $now = now();
-            $currentMonth = $now->month;
-            $previousMonth = $now->copy()->subMonth()->month;
-            $year = $now->year;
+            $carbon = new \Carbon\Carbon();
+            if ($request->filled('from') && $request->filled('to')) {
+                $from = \Carbon\Carbon::parse($request->from)->startOfDay();
+                $to = \Carbon\Carbon::parse($request->to)->endOfDay();
+                $periodDays = $from->diffInDays($to) + 1;
+                $prevTo = $from->copy()->subDay();
+                $prevFrom = $prevTo->copy()->subDays($periodDays - 1);
+            } else {
+                $from = $now->copy()->startOfMonth();
+                $to = $now->copy()->endOfMonth();
+                $prevTo = $from->copy()->subDay();
+                $prevFrom = $prevTo->copy()->startOfMonth();
+            }
 
-            // Helper to get week number in month
-            $getWeekOfMonth = function($date) {
-                $firstDay = $date->copy()->startOfMonth();
-                return intval(floor(($date->day - 1 + $firstDay->dayOfWeek) / 7) + 1);
+            // Helper to get week number in period
+            $getWeekOfPeriod = function ($date, $periodStart) {
+                return intval(floor($date->diffInDays($periodStart) / 7) + 1);
             };
 
-            // Current month data
-            $currentMonthData = [1 => 0, 2 => 0, 3 => 0, 4 => 0];
-            $farmsCurrent = Farm::whereYear('created_at', $year)
-                ->whereMonth('created_at', $currentMonth)
-                ->get();
+            // Current period
+            $farmsCurrent = Farm::whereBetween('created_at', [$from, $to])->get();
+            $weeksCurrent = [];
             foreach ($farmsCurrent as $farm) {
-                $week = $getWeekOfMonth($farm->created_at);
-                if (isset($currentMonthData[$week])) {
-                    $currentMonthData[$week]++;
+                $week = $getWeekOfPeriod($farm->created_at, $from);
+                if (!isset($weeksCurrent[$week])) {
+                    $weeksCurrent[$week] = 0;
                 }
+                $weeksCurrent[$week]++;
             }
 
-            // Previous month data
-            $previousMonthData = [1 => 0, 2 => 0, 3 => 0, 4 => 0];
-            $farmsPrevious = Farm::whereYear('created_at', $year)
-                ->whereMonth('created_at', $previousMonth)
-                ->get();
+            // Previous period
+            $farmsPrevious = Farm::whereBetween('created_at', [$prevFrom, $prevTo])->get();
+            $weeksPrevious = [];
             foreach ($farmsPrevious as $farm) {
-                $week = $getWeekOfMonth($farm->created_at);
-                if (isset($previousMonthData[$week])) {
-                    $previousMonthData[$week]++;
+                $week = $getWeekOfPeriod($farm->created_at, $prevFrom);
+                if (!isset($weeksPrevious[$week])) {
+                    $weeksPrevious[$week] = 0;
                 }
+                $weeksPrevious[$week]++;
             }
 
-            // Total for current month
+            // Determine max number of weeks in either period
+            $allWeeks = array_keys($weeksCurrent + $weeksPrevious);
+            $maxWeek = !empty($allWeeks) ? max($allWeeks) : 1;
+            $weekLabels = [];
+            $currentMonthData = [];
+            $previousMonthData = [];
+            for ($i = 1; $i <= $maxWeek; $i++) {
+                $weekLabels[] = "الأسبوع $i";
+                $currentMonthData[] = $weeksCurrent[$i] ?? 0;
+                $previousMonthData[] = $weeksPrevious[$i] ?? 0;
+            }
+
             $totalCurrent = array_sum($currentMonthData);
             $totalPrevious = array_sum($previousMonthData);
             $change = $totalPrevious > 0 ? round((($totalCurrent - $totalPrevious) / $totalPrevious) * 100, 2) : 0;
@@ -90,19 +124,24 @@ class AdminHomeController extends Controller
                 'status' => true,
                 'message' => 'Farm registration trends fetched successfully',
                 'data' => [
-                    'weeks' => ['الأسبوع 4', 'الأسبوع 3', 'الأسبوع 2', 'الأسبوع 1'],
-                    'current_month' => array_values($currentMonthData),
-                    'previous_month' => array_values($previousMonthData),
+                    'weeks' => $weekLabels,
+                    'current_period' => $currentMonthData,
+                    'previous_period' => $previousMonthData,
                     'total_current' => $totalCurrent,
                     'total_previous' => $totalPrevious,
                     'change_percent' => $change,
+                    'current_period_range' => [$from->toDateString(), $to->toDateString()],
+                    'previous_period_range' => [$prevFrom->toDateString(), $prevTo->toDateString()],
                 ],
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => $e->getMessage(),
-            ], 500);
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $e->getMessage(),
+                ],
+                500,
+            );
         }
     }
 
@@ -115,19 +154,21 @@ class AdminHomeController extends Controller
             $previousMonth = $now->copy()->subMonth()->month;
             $year = $now->year;
 
-            $getWeekOfMonth = function($date) {
+            $getWeekOfMonth = function ($date) {
                 $firstDay = $date->copy()->startOfMonth();
                 return intval(floor(($date->day - 1 + $firstDay->dayOfWeek) / 7) + 1);
             };
 
             // Current month data
             $currentMonthData = [1 => 0, 2 => 0, 3 => 0, 4 => 0];
-            $usersCurrent = User::whereYear('created_at', $year)
-                ->whereMonth('created_at', $currentMonth)
-                ->whereHas('roles', function ($query) {
-                    $query->where('name', '!=', 'admin');
-                })
-                ->get();
+            $usersCurrent = $this->applyDateFilter(
+                User::whereYear('created_at', $year)
+                    ->whereMonth('created_at', $currentMonth)
+                    ->whereHas('roles', function ($query) {
+                        $query->where('name', '!=', 'admin');
+                    }),
+                $request,
+            )->get();
             foreach ($usersCurrent as $user) {
                 $week = $getWeekOfMonth($user->created_at);
                 if (isset($currentMonthData[$week])) {
@@ -137,12 +178,14 @@ class AdminHomeController extends Controller
 
             // Previous month data
             $previousMonthData = [1 => 0, 2 => 0, 3 => 0, 4 => 0];
-            $usersPrevious =User::whereYear('created_at', $year)
-                ->whereMonth('created_at', $previousMonth)
-                ->whereHas('roles', function ($query) {
-                    $query->where('name', '!=', 'admin');
-                })
-                ->get();
+            $usersPrevious = $this->applyDateFilter(
+                User::whereYear('created_at', $year)
+                    ->whereMonth('created_at', $previousMonth)
+                    ->whereHas('roles', function ($query) {
+                        $query->where('name', '!=', 'admin');
+                    }),
+                $request,
+            )->get();
             foreach ($usersPrevious as $user) {
                 $week = $getWeekOfMonth($user->created_at);
                 if (isset($previousMonthData[$week])) {
@@ -167,37 +210,34 @@ class AdminHomeController extends Controller
                 ],
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => $e->getMessage(),
-            ], 500);
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $e->getMessage(),
+                ],
+                500,
+            );
         }
     }
 
-        // Animal event type stats for all animals (admin/global)
-        public function globalAnimalEventTypeStats(Request $request)
+    // Animal event type stats for all animals (admin/global)
+    public function globalAnimalEventTypeStats(Request $request)
     {
         try {
-            // Get all animals
-            $animalIds = Animal::pluck('id');
-            // Get all event types
+            $animalIds = $this->applyDateFilter(Animal::query(), $request)->pluck('id');
             $eventTypes = EventType::all();
-            // Count events for each type
             $eventTypeStats = [];
             $total = 0;
             foreach ($eventTypes as $eventType) {
-                $count = Event::whereIn('animal_id', $animalIds)
-                    ->where('eventType_id', $eventType->id)
-                    ->count();
+                $count = $this->applyDateFilter(Event::whereIn('animal_id', $animalIds)->where('eventType_id', $eventType->id), $request)->count();
                 $eventTypeStats[] = [
                     'name' => $eventType->name,
                     'count' => $count,
                 ];
                 $total += $count;
             }
-            // Calculate percentages
             foreach ($eventTypeStats as &$stat) {
-                $stat['percentage'] = $total > 0 ? round($stat['count'] / $total * 100, 2) : 0;
+                $stat['percentage'] = $total > 0 ? round(($stat['count'] / $total) * 100, 2) : 0;
             }
             return response()->json([
                 'status' => true,
@@ -206,10 +246,13 @@ class AdminHomeController extends Controller
                 'total' => $total,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => $e->getMessage(),
-            ], 500);
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $e->getMessage(),
+                ],
+                500,
+            );
         }
     }
 
@@ -217,10 +260,10 @@ class AdminHomeController extends Controller
     public function globalAnimalBreedStats(Request $request)
     {
         try {
-            $breeds = \App\Models\AnimalBreed::all();
+            $breeds = AnimalBreed::all();
             $breedStats = [];
             foreach ($breeds as $breed) {
-                $count = \App\Models\Animal::where('breed_id', $breed->id)->count();
+                $count = $this->applyDateFilter(Animal::where('breed_id', $breed->id), $request)->count();
                 $breedStats[] = [
                     'name' => $breed->name,
                     'count' => $count,
@@ -232,10 +275,13 @@ class AdminHomeController extends Controller
                 'data' => $breedStats,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => $e->getMessage(),
-            ], 500);
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $e->getMessage(),
+                ],
+                500,
+            );
         }
     }
 
@@ -243,18 +289,14 @@ class AdminHomeController extends Controller
     public function mostActiveFarms(Request $request)
     {
         try {
-            $farms = \App\Models\Farm::all();
+            $farms = $this->applyDateFilter(Farm::query(), $request)->get();
             $result = [];
             foreach ($farms as $farm) {
-                $animalIds = $farm->animals()->pluck('id');
+                $animalIds = $this->applyDateFilter($farm->animals(), $request)->pluck('id');
                 // Health events (eventType_id = 1)
-                $healthEvents = \App\Models\Event::whereIn('animal_id', $animalIds)
-                    ->where('eventType_id', 1)
-                    ->count();
+                $healthEvents = $this->applyDateFilter(Event::whereIn('animal_id', $animalIds)->where('eventType_id', 1), $request)->count();
                 // Birth events (eventType_id = 2)
-                $birthEvents = \App\Models\Event::whereIn('animal_id', $animalIds)
-                    ->where('eventType_id', 2)
-                    ->count();
+                $birthEvents = $this->applyDateFilter(Event::whereIn('animal_id', $animalIds)->where('eventType_id', 2), $request)->count();
                 // Genetic analyses (random number for demo)
                 $geneticAnalyses = rand(50, 150);
                 $result[] = [
@@ -266,7 +308,9 @@ class AdminHomeController extends Controller
                 ];
             }
             // Sort by total_activity desc and take top 5
-            usort($result, function($a, $b) { return $b['total_activity'] <=> $a['total_activity']; });
+            usort($result, function ($a, $b) {
+                return $b['total_activity'] <=> $a['total_activity'];
+            });
             $result = array_slice($result, 0, 5);
             return response()->json([
                 'status' => true,
@@ -274,12 +318,13 @@ class AdminHomeController extends Controller
                 'data' => $result,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => $e->getMessage(),
-            ], 500);
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $e->getMessage(),
+                ],
+                500,
+            );
         }
     }
-    
 }
-

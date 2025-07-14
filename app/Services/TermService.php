@@ -10,14 +10,13 @@ class TermService
     public function getAllTerms($data, $role)
     {
         $query = Term::query();
-        
+
         if (isset($data['search'])) {
             $query->where(function ($q) use ($data) {
-                $q->where('title', 'like', '%' . $data['search'] . '%')
-                  ->orWhere('description', 'like', '%' . $data['search'] . '%');
+                $q->where('title', 'like', '%' . $data['search'] . '%')->orWhere('description', 'like', '%' . $data['search'] . '%');
             });
         }
-        
+
         if (isset($data['type'])) {
             $query->where('type', $data['type']);
         }
@@ -144,32 +143,20 @@ class TermService
     }
 
     // export sheet
-    public function exportSheet($ids, $user)
+    public function exportSheet($id)
     {
-        if (empty($ids)) {
-            // لو مفيش ids → نجيب كل المستخدمين باـ role المطلوب
-            $terms = Term::all();
-        } else {
-            // لو فيه ids → نجيب فقط اللي اـ id بتاعه في القامة
-            $terms = Term::whereIn('id', $ids)->get();
-        }
+        $term = Term::find($id);
 
-        $csvData = [];
-
-        foreach ($terms as $term) {
-            $csvData[] = [
-                'id' => $term->id,
+        $data = [
                 'type' => $term->type,
-                'role' => $term->role,
                 'title' => $term->title,
                 'description' => $term->description,
-                'is_active' => $term->is_active,
-            ];
-        }
+                'created_at' => $term->created_at,
+        ];
 
-        $filename = 'terms_export_' . now()->format('Ymd_His') . '.csv';
-        $media = ExportHelper::exportToMedia($csvData, $user, 'exports', $filename);
+        $filename = 'terms_export_' . now()->format('Ymd_His') . '.pdf';
+        $media = ExportHelper::exportPdfToMedia($data, 'exports.pdf_table', $term, 'exports', $filename);
 
         return $media->getFullUrl();
     }
-} 
+}
