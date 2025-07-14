@@ -94,10 +94,10 @@ class UserService
     {
         $user = User::find($id);
 
-        $user->name = $data['name'];
-        $user->email = $data['email'];
-        $user->phone = $data['phone'];
-        $user->is_active = $data['is_active'] ?? true;
+        $user->name = $data['name'] ?? $user->name;
+        $user->email = $data['email'] ?? $user->email;
+        $user->phone = $data['phone'] ?? $user->phone;
+        $user->is_active = $data['is_active'];
         $user->save();
 
         if (isset($data['role'])) {
